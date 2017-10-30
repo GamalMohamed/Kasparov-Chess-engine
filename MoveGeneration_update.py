@@ -40,13 +40,51 @@ def doFEN2Board(FEN) :  # (Safaa) and (Sara)
 # return false otherwise.
 
 def testCheck(BlackBitBoard,WhiteBitBoard, move, board =[], *args ): # (Gamal Mohammed)
-    return BlackBitBoard
+    return "true"
 
-#_____________________________________________________________________________#
-#This will return all possible moves for a certain piece
-#return the list with updated board , BlackBitBoard , WhiteBitBoard after Move
-def generateMoves(BlackBitBoard,WhiteBitBoard,piece, board =[], *args ): # (Hager) and (Abdelrhman)
-    return BlackBitBoard
+
+def generateMoves(BlackBitBoard,WhiteBitBoard,piece,left,right, board =[], *args ): # (Hager) and (Abdelrhman)
+    possible=[]
+    Chess_Chari={"K": [-1, -1, -1, 0,  0,  1, 1, 1, 3,29],"B": [-1,  0, -1, 0,  0,  1, 0, 1, 1,27,30],"R": [ 0, -1, 0,  0,  0, 0, 1, 0, 1,25,32]}
+    Chess_Charj={"K": [-1,  0,  1, -1, 1, -1, 0, 1, 3,29],"B": [-1,  0,  1, 0,  0, -1, 0, 1, 1,27,30],"R": [ 0,  0, 0, -1,  1, 0, 0, 0, 1,25,32]}
+    adi =Chess_Chari[piece]
+    adj =Chess_Charj[piece]
+    castling=[left,right]
+    castlingx=[136,9]
+    for j in range(2):
+        print(board[adi[9+j]])
+        if board[adi[9+j]]==0:
+            print(adi)
+            continue;
+        for i in range(8):
+            x=board[adi[9+j]]
+            idxi=int(x/8)+adi[i]
+            idxj=x%8+adj[i]
+            x=x+adi[i]*8+adj[i]
+            check=1
+            while 0 <= idxi <8 and 0 < idxj <=8 and check==1:
+                if x<64:
+                    l=1<<(64-x)
+                if l&WhiteBitBoard>0:
+                    break
+                u=piece+str(j)+" "+str(board[adi[8+j]])+" "+ str(x)
+                check=adi[8]
+                if testCheck(BlackBitBoard,WhiteBitBoard,u, board)=="true":
+                    possible.append(x)
+                if l&BlackBitBoard>0:
+                    break
+                idxi=idxi+adi[i]
+                idxj=idxj+adj[i]
+                #print(str(idxi) +"  "+ str(idxj))
+                x=x+adi[i]*8+adj[i]
+        if piece=="K":
+            break
+    for j in range(2):
+        if adi[8]==3 and castling[j]==1:
+            if WhiteBitBoard^castlingx[j]==0:
+                if testCheck(BlackBitBoard,WhiteBitBoard,u, board)=="true": #check 2 squares beside king and King
+                    possible.append((j+1)*1000)
+    return possible
 #_____________________________________________________________________________#
 #This will do a sepcific move.[piece name and move included as generated from FEM file)
 #return the updated board , BlackBitBoard , WhiteBitBoard
@@ -58,4 +96,17 @@ def doMove(BlackBitBoard,WhiteBitBoard, move, board =[], *args  ): #Hesham Magdy
 #Update board , BlackBitBoard , WhiteBitBoard [to account for Threefold repetition draw rule]
 def updatePastMoves(move): #(Sara) and (Safa)
     return move
-
+#Bishop
+#board=[0 ,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0  ,0,0,0,0,0,0,0,0 ,0,0,37,0,0,0,0,0]
+#BlackBitBoard=1<<18
+#WhiteBitBoard=(1<<(64-37))
+#King
+board=[0 ,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0  ,0,0,0,0,0,0,0,0 ,0,0,0,0,61,0,0,0]
+BlackBitBoard=0
+WhiteBitBoard=10
+#Rook
+#board=[0 ,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0  ,0,0,0,0,0,0,0,0 ,37,0,0,0,0,0,0,0]
+#BlackBitBoard=1<<18
+#WhiteBitBoard=(1<<(64-37))
+x=generateMoves(BlackBitBoard,WhiteBitBoard,"K",0,1, board )
+print (x)
