@@ -1,0 +1,10 @@
+NOTES:-
+
+1- board from 0 to 63 or 1 to 64
+
+2- we are always white or not
+
+3- board[i]= -1 mean this piece is died 
+
+4- black side in int64 in most sign. or least sign. mean that is like : 1100000000000000 0r 00000000000000011
+
