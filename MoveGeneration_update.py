@@ -39,7 +39,7 @@ def doFEN2Board(FEN) :  # (Safaa) and (Sara)
 # return true : if move will cause Check
 # return false otherwise.
 
-def testCheck(BlackBitBoard,WhiteBitBoard, move, board =[], *args ): # (Gamal Mohammed)
+def testCheck(BlackBitBoard,WhiteBitBoard, move,castling, board =[], *args ): # (Gamal Mohammed)
     return "true"
 
 
@@ -53,7 +53,7 @@ def generateMoves(BlackBitBoard,WhiteBitBoard,piece,left,right, board =[], *args
     castlingx=[136,9]
     for j in range(2):
         print(board[adi[9+j]])
-        if board[adi[9+j]]==0:
+        if board[adi[9+j]]==-1:
             print(adi)
             continue;
         for i in range(8):
@@ -69,7 +69,7 @@ def generateMoves(BlackBitBoard,WhiteBitBoard,piece,left,right, board =[], *args
                     break
                 u=piece+str(j)+" "+str(board[adi[8+j]])+" "+ str(x)
                 check=adi[8]
-                if testCheck(BlackBitBoard,WhiteBitBoard,u, board)=="true":
+                if testCheck(BlackBitBoard,WhiteBitBoard,u,"false", board)=="true":
                     possible.append(x)
                 if l&BlackBitBoard>0:
                     break
@@ -82,7 +82,7 @@ def generateMoves(BlackBitBoard,WhiteBitBoard,piece,left,right, board =[], *args
     for j in range(2):
         if adi[8]==3 and castling[j]==1:
             if WhiteBitBoard^castlingx[j]==0:
-                if testCheck(BlackBitBoard,WhiteBitBoard,u, board)=="true": #check 2 squares beside king and King
+                if testCheck(BlackBitBoard,WhiteBitBoard,u,"true", board)=="true": #check 2 squares beside king and King
                     possible.append((j+1)*1000)
     return possible
 #_____________________________________________________________________________#
@@ -97,15 +97,15 @@ def doMove(BlackBitBoard,WhiteBitBoard, move, board =[], *args  ): #Hesham Magdy
 def updatePastMoves(move): #(Sara) and (Safa)
     return move
 #Bishop
-#board=[0 ,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0  ,0,0,0,0,0,0,0,0 ,0,0,37,0,0,0,0,0]
+#board=[-1 ,-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,37,-1,-1,-1,-1,-1]
 #BlackBitBoard=1<<18
 #WhiteBitBoard=(1<<(64-37))
 #King
-board=[0 ,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0  ,0,0,0,0,0,0,0,0 ,0,0,0,0,61,0,0,0]
+board=[-1 ,-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,61,-1,-1,-1]
 BlackBitBoard=0
-WhiteBitBoard=10
+WhiteBitBoard=9
 #Rook
-#board=[0 ,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0  ,0,0,0,0,0,0,0,0 ,37,0,0,0,0,0,0,0]
+#board=[-1 ,-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1 ,37,-1,-1,-1,-1,-1,-1,-1]
 #BlackBitBoard=1<<18
 #WhiteBitBoard=(1<<(64-37))
 x=generateMoves(BlackBitBoard,WhiteBitBoard,"K",0,1, board )
