@@ -1,10 +1,12 @@
 NOTES:-
 
-1- board from 0 to 63 or 1 to 64
+1- board from 1 to 64 array is 32 bit start from 0 to 31 
+{0 to 15 are white side (first 8 are 8 pawns and second 8 are others) 16 to 31 are black side (first 8 are 8 pawns and second 8 are others)}
 
-2- we are always white or not
+2- we are always white
 
 3- board[i]= -1 mean this piece is died 
 
-4- black side in int64 in most sign. or least sign. mean that is like : 1100000000000000 0r 00000000000000011
+4- black side in int64 in most signmean that is like : 1100000000000000
 
+Move generation return list of places of valid moves 
