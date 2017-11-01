@@ -45,8 +45,8 @@ def testCheck(BlackBitBoard,WhiteBitBoard, move,castling, board =[], *args ): # 
 
 def generateMoves(BlackBitBoard,WhiteBitBoard,piece,left,right, board =[], *args ): # (Hager) and (Abdelrhman)
     possible=[]
-    Chess_Chari={"K": [-1, -1, -1, 0,  0,  1, 1, 1, 3,29],"B": [-1,  0, -1, 0,  0,  1, 0, 1, 1,27,30],"R": [ 0, -1, 0,  0,  0, 0, 1, 0, 1,25,32]}
-    Chess_Charj={"K": [-1,  0,  1, -1, 1, -1, 0, 1, 3,29],"B": [-1,  0,  1, 0,  0, -1, 0, 1, 1,27,30],"R": [ 0,  0, 0, -1,  1, 0, 0, 0, 1,25,32]}
+    Chess_Chari={"K": [-1, -1, -1, 0,  0,  1, 1, 1, 3,12],"B": [-1,  0, -1, 0,  0,  1, 0, 1, 1,10,14],"R": [ 0, -1, 0,  0,  0, 0, 1, 0, 1,8,15]}
+    Chess_Charj={"K": [-1,  0,  1, -1, 1, -1, 0, 1, 3,12],"B": [-1,  0,  1, 0,  0, -1, 0, 1, 1,10,14],"R": [ 0,  0, 0, -1,  1, 0, 0, 0, 1,8,15]}
     adi =Chess_Chari[piece]
     adj =Chess_Charj[piece]
     castling=[left,right]
@@ -97,16 +97,16 @@ def doMove(BlackBitBoard,WhiteBitBoard, move, board =[], *args  ): #Hesham Magdy
 def updatePastMoves(move): #(Sara) and (Safa)
     return move
 #Bishop
-#board=[-1 ,-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,37,-1,-1,-1,-1,-1]
-#BlackBitBoard=1<<18
-#WhiteBitBoard=(1<<(64-37))
+board=[-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,37,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1 ]
+BlackBitBoard=1<<18
+WhiteBitBoard=(1<<(64-37))
 #King
-board=[-1 ,-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,61,-1,-1,-1]
-BlackBitBoard=0
-WhiteBitBoard=9
+#board=[-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,61,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1 ]
+#BlackBitBoard=0
+#WhiteBitBoard=9
 #Rook
-#board=[-1 ,-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1 ,37,-1,-1,-1,-1,-1,-1,-1]
+#board=[-1,-1,-1,-1,-1,-1,-1,-1 ,37,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1]
 #BlackBitBoard=1<<18
 #WhiteBitBoard=(1<<(64-37))
-x=generateMoves(BlackBitBoard,WhiteBitBoard,"K",0,1, board )
+x=generateMoves(BlackBitBoard,WhiteBitBoard,"B",0,1, board )
 print (x)
