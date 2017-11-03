@@ -23,160 +23,228 @@ Implementation Team Work to test their code also [But read from console rather t
 """
 
 #_____________________________________________________________________________#
-#This will convert the FEN file and covert it to a board 
+#This will convert the FEN file and covert it to a board
 #  return the array board[], BlackBitBoard , WhiteBitBoard
-"""
-Note in python you can return more than 1 variable ex : return board, BlackBitBoard, WhiteBitBoard will return all of those 
-and in call you can simple use : Board,BlackBB,WhiteBB = readFEN2Board(FEN);
-"""
 from collections import defaultdict
 import re
 def readFEN2Board(FEN) :
     ranks = FEN.split(" ")[0].split("/")
     Side_To_M = FEN.split(" ")[1]
     C_A = FEN.split(" ")[2]
-    Left1=0
-    Right1=0
-    Left2=0
-    Right2=0
-    if (C_A[0]=="K"):
-        Left1=1
-    if(C_A[1]=="Q"):
-        Right1=1
-    if (C_A[2]=="k"):
-        Left2=1
-    if(C_A[3]=="q"):
-        Right2=1
-    C_A_L=[Left1,Right1,Left2,Right2]
-    E_P_T_S=FEN.split(" ")[3]
-    if(E_P_T_S=="-"):
-        E_P_T_S=-1
+    Left1 = 0
+    Right1 = 0
+    Left2 = 0
+    Right2 = 0
+    if (C_A[0] == "K"):
+        Left1 = 1
+    if(C_A[1] == "Q"):
+        Right1 = 1
+    if (C_A[2] == "k"):
+        Left2 = 1
+    if(C_A[3] == "q"):
+        Right2 = 1
+    C_A_L = [Left1,Right1,Left2,Right2]
+    E_P_T_S = FEN.split(" ")[3]
+    if(E_P_T_S == "-"):
+        E_P_T_S = -1
     else:
-        c=E_P_T_S[0]
-        E_P_T_S=(8*(8-int(E_P_T_S[1])))+((ord(c)-96))
-    H_M_Clk=FEN.split(" ")[4]
-    F_M_Counter=FEN.split(" ")[5]
-    ############ generate board  Array###############################################################
-    board=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+        c = E_P_T_S[0]
+        E_P_T_S = (8 * (8 - int(E_P_T_S[1]))) + ((ord(c) - 96))
+    H_M_Clk = FEN.split(" ")[4]
+    F_M_Counter = FEN.split(" ")[5]
+    ############ generate board
+    ############ Array###############################################################
+    board = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
     mylist = ["P","P","P","P","P","P","P","P","R","N","B","Q","K","B","N","R","r","n","b","q","k","b","n","r","p","p","p","p","p","p","p","p"]
     D = defaultdict(list)
     for i,item in enumerate(mylist):D[item].append(i)   
     Arr = {k:v for k,v in D.items()}
-    ranki=0
-    index=0
-    index2=0
-    count1=0
-    count2=0
+    ranki = 0
+    index = 0
+    index2 = 0
+    count1 = 0
+    count2 = 0
     for rank in ranks:
         for r in rank:
             if (re.compile("([kqbnrpKQBNRP])").match(r)):
-                index=index+1
-                if(board[(Arr[r][0])]!=-1):
-                    if(r=='p'): 
+                index = index + 1
+                if(board[(Arr[r][0])] != -1):
+                    if(r == 'p'): 
                         count1 += 1
-                        index2=(Arr[r][count1])
-                    elif (r=='P'):
+                        index2 = (Arr[r][count1])
+                    elif (r == 'P'):
                         count2 +=1
-                        index2=(Arr[r][count2])
-                    else: index2=(Arr[r][1])
-                else:index2=(Arr[r][0])
-                board[index2]=(ranki*8)+index
-            else: index=index+int(r)
-        ranki=ranki+1
-        index=0
-    ############ Whitebitboard & Blackbitboard    
-    m=0
-    n=0
+                        index2 = (Arr[r][count2])
+                    else: index2 = (Arr[r][1])
+                else:index2 = (Arr[r][0])
+                board[index2] = (ranki * 8) + index
+            else: index = index + int(r)
+        ranki = ranki + 1
+        index = 0
+    ############ Whitebitboard & Blackbitboard
+    m = 0
+    n = 0
     for x in range(15):
-        if(board[x]!=-1 and m==0 ):
-            m=1
-            w = (1<<64-board[x])
-        if(m==1 and board[x+1]!=-1 ): 
-            w = w ^ (1<<64-board[x+1])
-        if(board[x+16]!=-1 and n==0 ):
-            n=1
-            b = (1<<64-board[x+16])
-        if(n==1 and board[x+17]!=-1 ):
-            b = b ^ (1<<64-board[x+17])
-    blackbitboard=('{0:064b}'.format(b))
-    whitebitboard=('{0:064b}'.format(w))
+        if(board[x] != -1 and m == 0):
+            m = 1
+            w = (1 << 64 - board[x])
+        if(m == 1 and board[x + 1] != -1): 
+            w = w ^ (1 << 64 - board[x + 1])
+        if(board[x + 16] != -1 and n == 0):
+            n = 1
+            b = (1 << 64 - board[x + 16])
+        if(n == 1 and board[x + 17] != -1):
+            b = b ^ (1 << 64 - board[x + 17])
+    blackbitboard = ('{0:064b}'.format(b))
+    whitebitboard = ('{0:064b}'.format(w))
     return(board,blackbitboard,whitebitboard,C_A_L,E_P_T_S,H_M_Clk,F_M_Counter) 
 
 
+def CheckAttackLine(BlackBitBoard,WhiteBitBoard,king_loc,step,board=[],potentialAttackers=[],board_limits=[]):
+    i = king_loc + step
+    esc = False
+    while not esc:
+        if i in board_limits:
+            esc = True
+        if WhiteBitBoard & (1 << i): # Hit white piece, I'm safe!
+            break
+        if BlackBitBoard & (1 << i): # Hit black piece, DANGER!!
+            for p in range(16,len(board)):
+                if board[p] == i:
+                    if p in potentialAttackers: 
+                        return False
+        i+=step
+        
+    return True
+
 
 #_____________________________________________________________________________
-#This will check if a move of a certain piece result in a check 
-# return true : if move will cause Check
-# return false otherwise.
+#This will check if a move of a certain piece result in a check
+#   return true : if move will cause Check
+#   return false otherwise.
+def CheckMate(BlackBitBoard,WhiteBitBoard, move,castling, board=[], *args): # (Gamal Mohammed)
+    # Emulate move
+    emulated_board = board[:]
+    BlackBitBoard,WhiteBitBoard,emulated_board = doMove(BlackBitBoard,WhiteBitBoard,move,emulated_board)
 
-def testCheck(BlackBitBoard,WhiteBitBoard, move,castling, board =[], *args ): # (Gamal Mohammed)
-    return "true"
+    if not castling:
+        king_loc = emulated_board[12]
+        count = 1
+    else:
+        side_squares = [3,2]
+        king_loc = side_squares[0]
+        count = 2
+
+    for i in range(count):
+        # 1.  Check Left diagonal attack line, if exists
+        potentialAttackers = [16,17,18,19,20,21,22,23,26,29,27]         # Black Queen or Bishops or Pawns
+        if king_loc != 7:
+            board_limits = [7,15,23,31,39,47,55,56,63,57,58,59,60,61,62]
+            if not CheckAttackLine(BlackBitBoard,WhiteBitBoard,king_loc,9,board,potentialAttackers,board_limits):
+                return False
+
+        # 2.  Check Right diagonal attack line, if exists
+        if king_loc != 0:
+            board_limits = [0,8,16,24,32,40,48,56,57,58,59,60,61,62,63]
+            if not CheckAttackLine(BlackBitBoard,WhiteBitBoard,king_loc,7,board,potentialAttackers,board_limits):
+                return False
+
+        # 3.  Check Forward Vertical attack line, if exists
+        potentialAttackers = [27,24,31]            # Black Queen or Rooks
+        board_limits = range(0,64)
+        if not CheckAttackLine(BlackBitBoard,WhiteBitBoard,king_loc,8,board,potentialAttackers,board_limits):
+            return False
+
+        # 4.  Check Right Horizontal attack line, if exists
+        if king_loc != 0:
+            board_limits = [0,8,16,24,32,40,48,56]
+            if not CheckAttackLine(BlackBitBoard,WhiteBitBoard,king_loc,-1,board,potentialAttackers,board_limits):
+                return False
+
+        # 5.  Check Left Horizontal attack line, if exists
+        if king_loc != 7:
+            board_limits = [7,15,23,31,39,47,55,56,63]
+            if not CheckAttackLine(BlackBitBoard,WhiteBitBoard,king_loc,1,board,potentialAttackers,board_limits):
+                return False
+
+        if count == 2:
+            king_loc = side_squares[1]
+
+    return True
 
 
-def generateMoves(BlackBitBoard,WhiteBitBoard,piece,left,right, board =[], *args ): # (Hager) and (Abdelrhman)
-    possible=[]
-    Chess_Chari={"K": [-1, -1, -1, 0,  0,  1, 1, 1, 3,12],"B": [-1,  0, -1, 0,  0,  1, 0, 1, 1,10,14],"R": [ 0, -1, 0,  0,  0, 0, 1, 0, 1,8,15]}
-    Chess_Charj={"K": [-1,  0,  1, -1, 1, -1, 0, 1, 3,12],"B": [-1,  0,  1, 0,  0, -1, 0, 1, 1,10,14],"R": [ 0,  0, 0, -1,  1, 0, 0, 0, 1,8,15]}
-    adi =Chess_Chari[piece]
-    adj =Chess_Charj[piece]
-    castling=[left,right]
-    castlingx=[136,9]
+def generateMoves(BlackBitBoard,WhiteBitBoard,piece,left,right, board=[], *args): # (Hager) and (Abdelrhman)
+    possible = []
+    Chess_Chari = {"K": [-1, -1, -1, 0,  0,  1, 1, 1, 3,12],"B": [-1,  0, -1, 0,  0,  1, 0, 1, 1,10,14],"R": [0, -1, 0,  0,  0, 0, 1, 0, 1,8,15]}
+    Chess_Charj = {"K": [-1,  0,  1, -1, 1, -1, 0, 1, 3,12],"B": [-1,  0,  1, 0,  0, -1, 0, 1, 1,10,14],"R": [0,  0, 0, -1,  1, 0, 0, 0, 1,8,15]}
+    adi = Chess_Chari[piece]
+    adj = Chess_Charj[piece]
+    castling = [left,right]
+    castlingx = [136,9]
     for j in range(2):
-        print(board[adi[9+j]])
-        if board[adi[9+j]]==-1:
+        print(board[adi[9 + j]])
+        if board[adi[9 + j]] == -1:
             print(adi)
-            continue;
+            continue
         for i in range(8):
-            x=board[adi[9+j]]
-            idxi=int(x/8)+adi[i]
-            idxj=x%8+adj[i]
-            x=x+adi[i]*8+adj[i]
-            check=1
-            while 0 <= idxi <8 and 0 < idxj <=8 and check==1:
-                if x<64:
-                    l=1<<(64-x)
-                if l&WhiteBitBoard>0:
+            x = board[adi[9 + j]]
+            idxi = int(x / 8) + adi[i]
+            idxj = x % 8 + adj[i]
+            x = x + adi[i] * 8 + adj[i]
+            check = 1
+            while 0 <= idxi < 8 and 0 < idxj <= 8 and check == 1:
+                if x < 64:
+                    l = 1 << (64 - x)
+                if l & WhiteBitBoard > 0:
                     break
-                u=piece+str(j)+" "+str(board[adi[8+j]])+" "+ str(x)
-                check=adi[8]
-                if testCheck(BlackBitBoard,WhiteBitBoard,u,"false", board)=="true":
+                u = piece + str(j) + " " + str(board[adi[8 + j]]) + " " + str(x)
+                check = adi[8]
+                if CheckMate(BlackBitBoard,WhiteBitBoard,u,False, board) == True:
                     possible.append(x)
-                if l&BlackBitBoard>0:
+                if l & BlackBitBoard > 0:
                     break
-                idxi=idxi+adi[i]
-                idxj=idxj+adj[i]
-                #print(str(idxi) +"  "+ str(idxj))
-                x=x+adi[i]*8+adj[i]
-        if piece=="K":
+                idxi = idxi + adi[i]
+                idxj = idxj + adj[i]
+                #print(str(idxi) +" "+ str(idxj))
+                x = x + adi[i] * 8 + adj[i]
+        if piece == "K":
             break
     for j in range(2):
-        if adi[8]==3 and castling[j]==1:
-            if WhiteBitBoard^castlingx[j]==0:
-                if testCheck(BlackBitBoard,WhiteBitBoard,u,"true", board)=="true": #check 2 squares beside king and King
-                    possible.append((j+1)*1000)
+        if adi[8] == 3 and castling[j] == 1:
+            if WhiteBitBoard ^ castlingx[j] == 0:
+                if CheckMate(BlackBitBoard,WhiteBitBoard,u,True, board) == True: #check 2 squares beside king and King
+                    possible.append((j + 1) * 1000)
     return possible
-#_____________________________________________________________________________#
-#This will do a sepcific move.[piece name and move included as generated from FEM file)
-#return the updated board , BlackBitBoard , WhiteBitBoard
-def doMove(BlackBitBoard,WhiteBitBoard, move, board =[], *args  ): #Hesham Magdy
-     return BlackBitBoard
 
 #_____________________________________________________________________________#
-#Update the pastMoves list by adding the current move to be done [to account for Fifty-Move Rule]
-#Update board , BlackBitBoard , WhiteBitBoard [to account for Threefold repetition draw rule]
+#This will do a sepcific move.[piece name and move included as generated from
+#FEM file)
+#return the updated board , BlackBitBoard , WhiteBitBoard
+def doMove(BlackBitBoard,WhiteBitBoard, move, board=[], *args): #Hesham Magdy
+     return BlackBitBoard,WhiteBitBoard,board
+
+#_____________________________________________________________________________#
+#Update the pastMoves list by adding the current move to be done [to account
+#for Fifty-Move Rule]
+#Update board , BlackBitBoard , WhiteBitBoard [to account for Threefold
+#repetition draw rule]
 def updatePastMoves(move): #(Sara) and (Safa)
     return move
+
+
 #Bishop
-board=[-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,37,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1 ]
-BlackBitBoard=1<<18
-WhiteBitBoard=(1<<(64-37))
+board = [-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,37,-1,5,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1]
+BlackBitBoard = 1 << 18
+WhiteBitBoard = (1 << (64 - 37))
 #King
-#board=[-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,61,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1 ]
+#board=[-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,61,-1,-1,-1
+#,-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1 ]
 #BlackBitBoard=0
 #WhiteBitBoard=9
 #Rook
-#board=[-1,-1,-1,-1,-1,-1,-1,-1 ,37,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1  ,-1,-1,-1,-1,-1,-1,-1,-1]
+#board=[-1,-1,-1,-1,-1,-1,-1,-1 ,37,-1,-1,-1,-1,-1,-1,-1
+#,-1,-1,-1,-1,-1,-1,-1,-1 ,-1,-1,-1,-1,-1,-1,-1,-1]
 #BlackBitBoard=1<<18
 #WhiteBitBoard=(1<<(64-37))
-x=generateMoves(BlackBitBoard,WhiteBitBoard,"B",0,1, board )
-print (x)
+x = generateMoves(BlackBitBoard,WhiteBitBoard,"B",0,1, board)
+print(x)

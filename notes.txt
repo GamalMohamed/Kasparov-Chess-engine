@@ -1,7 +1,7 @@
 NOTES:-
 
 1- board from 1 to 64 array is 32 bit start from 0 to 31 
-{0 to 15 are white side (first 8 are 8 pawns and second 8 are others) 16 to 31 are black side (first 8 are 8 pawns and second 8 are others)}
+{0 to 15 are white side (first 8 are 8 pawns and second 8 are RNBQKBNR ) 16 to 31 are black side (first 8 are 8 pawns and second 8 are RNBQKBNR  )}
 
 2- we are always white
 
