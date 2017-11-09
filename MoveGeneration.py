@@ -168,6 +168,9 @@ def CheckAttackLine(BlackBitBoard,WhiteBitBoard,king_loc,step,board=[],potential
 def CheckMate(BlackBitBoard,WhiteBitBoard, move,castling, board=[], *args):
     # Emulate move
     emulated_board = board[:]
+	#Debug [Abdelrhman : 11 August ] 
+    #print(move);
+    displayPieces(emulated_board);
     BlackBitBoard,WhiteBitBoard,emulated_board = doMove(BlackBitBoard,WhiteBitBoard,move,emulated_board)
 
     if not castling:
@@ -293,13 +296,58 @@ def generateMoves(BlackBitBoard,WhiteBitBoard,piece,left,right,order, board =[],
     
     return possible
 
+# _____________________________________________________________________________#
+# This will do a sepcific move.[piece name and move included as generated from
+# FEM file)
+# return the updated board , BlackBitBoard , WhiteBitBoard
+def doMove(BlackBitBoard, WhiteBitBoard, move, board=[], *args):  # Hesham Magdy
+
+    srcPos = int(move.split(" ")[1])# Move p0 13 45   [32 
+    dstPos = int(move.split(" ")[2])
+    if srcPos <65 and srcPos > 0 and dstPos < 65 and dstPos > 0:       
+        index1 = board.index(srcPos)  if srcPos in board else -1   # My piece 
+        index2 = board.index(dstPos)  if dstPos in board else -1  # My piece 
+        if index2!=-1:          # If dstPos exists in the board ; Then capture will be done 
+            index2 = board.index(dstPos) # Get index (Piece) of the captured piece of opponent
+            board[index2] = -1           # opponent piece died 
+            if int(index2/16) < 1 and int(index1/16) >= 1: # destination white - Source black 
+			    # Put zero in BlackBitBoard srcPos and one in BlackBitBoard dstPos
+				# Put zero in WhiteBitBoard dstPos
+                WhiteBitBoard = WhiteBitBoard ^  (1<<(64-dstPos)) ;  # XOR with 1 will invert bit (originally we know it is 1) so it will be zero 
+                BlackBitBoard = BlackBitBoard |  (1<<(64-dstPos)) ;  # OR With 1 will put 1 in dstPos and leave others the same 
+                BlackBitBoard = BlackBitBoard ^  (1<<(64-srcPos)) ;
+				
+            elif int(index2/16) >= 1 and int(index1/16) < 1:# destination black - Source  white
+                # Put zero in WhiteBitBoard srcPos and one in WhiteBitBoard dstPos
+				# Put zero in BlackBitBoard dstPos
+                WhiteBitBoard = WhiteBitBoard |  (1<<(64-dstPos)) ;  # XOR with 1 will invert bit (originally we know it is 1) so it will be zero 
+                BlackBitBoard = BlackBitBoard ^  (1<<(64-dstPos)) ;  # OR With 1 will put 1 in dstPos and leave others the same 
+                WhiteBitBoard = WhiteBitBoard ^  (1<<(64-srcPos)) ;
+        else:				  # If dstPos doesn't exists in the board ; Then Move 
+            if index1/16 < 1:
+                WhiteBitBoard = WhiteBitBoard |  (1<<(64-dstPos)) ;
+                WhiteBitBoard = WhiteBitBoard ^  (1<<(64-srcPos)) ;
+            else:
+                BlackBitBoard = BlackBitBoard |  (1<<(64-dstPos)) ; 
+                BlackBitBoard = BlackBitBoard ^  (1<<(64-srcPos)) ;
+				
+        board[index1] = dstPos
+    else:
+        print('Invalid Coordinates for doMove')
+        return BlackBitBoard, WhiteBitBoard, board
+ 	
+    return BlackBitBoard, WhiteBitBoard, board
+
 #_____________________________________________________________________________#
 #This will do a sepcific move.[piece name and move included as generated from
 #FEM file)
 #return the updated board , BlackBitBoard , WhiteBitBoard
-def doMove(BlackBitBoard,WhiteBitBoard, move, board=[], *args): #Hesham Magdy
+def evaluateBoard(BlackBitBoard,WhiteBitBoard, move, board=[], *args): #Hesham Magdy
      return BlackBitBoard,WhiteBitBoard,board
 
+	 
+	 
+	 
 #_____________________________________________________________________________#
 #Update the pastMoves list by adding the current move to be done [to account
 #for Fifty-Move Rule]
@@ -307,4 +355,7 @@ def doMove(BlackBitBoard,WhiteBitBoard, move, board=[], *args): #Hesham Magdy
 #repetition draw rule]
 def updatePastMoves(move): #(Sara) and (Safa)
     return move
+
+	
+	
 
