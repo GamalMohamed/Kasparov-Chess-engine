@@ -1,4 +1,19 @@
 """
+Development Notes:-
+
+	1- Board from 1 to 64 array is 32 bit start from 0 to 31 
+	{0 to 15 are white side (first 8 are 8 pawns and second 8 are RNBQKBNR ) 16 to 31 are black side (first 8 are 8 pawns and second 8 are RNBQKBNR  )}
+
+	2- We are always white
+
+	3- board[i]= -1 mean this piece is died 
+
+	4- Black side in int64 in most signmean that is like : 1100000000000000
+
+	5- Move generation return list of places of valid moves 
+"""
+
+"""
 	board[]		  : unsigned int64 1D array of length 32 (1st 16 elements represent white and the other 16 elements represent the black),  
 	                each element inside the array specify the location of the corresponding element 
 			        array element number 1 specify rock of the White and so on.
