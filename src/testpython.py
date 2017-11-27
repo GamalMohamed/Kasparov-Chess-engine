@@ -1,1 +1,3 @@
-print("heloo")
+from defs import *
+
+print(NOMOVE)

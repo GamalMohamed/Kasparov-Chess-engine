@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>35e5a3a0-cad0-497a-b51d-cac6e0a8b24a</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Test1_MoveGeneration.py</StartupFile>
+    <StartupFile>Search.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -21,7 +21,13 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="defs.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MoveGeneration.py" />
+    <Compile Include="Search.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Test1_MoveGeneration.py" />
     <Compile Include="testpython.py" />
   </ItemGroup>
