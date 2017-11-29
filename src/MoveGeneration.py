@@ -1,17 +1,7 @@
-"""
-Development Notes:-
 
-	1- Board from 1 to 64 array is 32 bit start from 0 to 31 
-	{0 to 15 are white side (first 8 are 8 pawns and second 8 are RNBQKBNR ) 16 to 31 are black side (first 8 are 8 pawns and second 8 are RNBQKBNR  )}
+# coding: utf-8
 
-	2- We are always white
-
-	3- board[i]= -1 mean this piece is died 
-
-	4- Black side in int64 in most signmean that is like : 1100000000000000
-
-	5- Move generation return list of places of valid moves 
-"""
+# In[ ]:
 
 """
 	board[]		  : unsigned int64 1D array of length 32 (1st 16 elements represent white and the other 16 elements represent the black),  
@@ -23,22 +13,25 @@ Development Notes:-
 	piece  		  : is char indicating name of piece as "K"
 	FEN    		  : string representing the chess board in Forsyth–Edwards Notation
 	pastMoves 	  : list contains all past moves.
-
 """
 
 """
 Integration Team Work / 
 Implementation Team Work to test their code also [But read from console rather than GUI]
-
 # will be called in main script at the initialization once only #
  get FEN at the program start from GUI and feed it to doFEN2Board(FEN);
-
  get Move from GUI and feed it to doMove();
-
 """
 from collections import defaultdict
+from collections import namedtuple
 import re
-
+import re
+import numpy as np
+import os
+import sys
+import random
+import time
+import array
 ### Debug Functions :
 #Display the bit board. [indicating the presence of a piece
 #into the console window for debug purposes
@@ -78,85 +71,89 @@ def displayPieces(boardTemp):
      print('Dead   ',end=" ")  
   print('')
 
-  
-#_____________________________________________________________________________#
-#This will convert the FEN file and covert it to a board
-#  return the array board[], BlackBitBoard , WhiteBitBoard
-# ( Safa Tharwat and Saraa Ahmed )
 def readFEN2Board(FEN) :
     ranks = FEN.split(" ")[0].split("/")
     Side_To_M = FEN.split(" ")[1]
-    C_A = FEN.split(" ")[2]
-    Left1 = 0
-    Right1 = 0
-    Left2 = 0
-    Right2 = 0
-    if (C_A[0] == "K"):
-        Left1 = 1
-    if(C_A[1] == "Q"):
-        Right1 = 1
-    if (C_A[2] == "k"):
-        Left2 = 1
-    if(C_A[3] == "q"):
-        Right2 = 1
-    C_A_L = [Left1,Right1,Left2,Right2]
-    E_P_T_S = FEN.split(" ")[3]
-    if(E_P_T_S == "-"):
-        E_P_T_S = -1
+    C_A = FEN.split(" ")[2]    # Castling Ability
+    Left1,Right1,Left2,Right2=0,0,0,0
+    if (C_A[0]=="K"):
+        Left1=1
+    if(C_A[1]=="Q"):
+        Right1=1
+    if (C_A[2]=="k"):
+        Left2=1
+    if(C_A[3]=="q"):
+        Right2=1
+    C_A_L=[Left1,Right1,Left2,Right2]
+    E_P_T_S=FEN.split(" ")[3]  # En Passant Target Square
+    if(E_P_T_S=="-"):
+        E_P_T_S=-1
     else:
-        c = E_P_T_S[0]
-        E_P_T_S = (8 * (8 - int(E_P_T_S[1]))) + ((ord(c) - 96))
-    H_M_Clk = FEN.split(" ")[4]
-    F_M_Counter = FEN.split(" ")[5]
-    ############ generate board
-    ############ Array###############################################################
-    board = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
-    mylist = ["P","P","P","P","P","P","P","P","R","N","B","Q","K","B","N","R","r","n","b","q","k","b","n","r","p","p","p","p","p","p","p","p"]
+        c=E_P_T_S[0]
+        E_P_T_S=(8*(8-int(E_P_T_S[1])))+((ord(c)-96))
+    H_M_Clk=FEN.split(" ")[4]    # Half-Move Clock
+    F_M_Counter=FEN.split(" ")[5] #Full-Move Counter
+    ############ generate board  Array###############################################################
+    board=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]  # initial -1
+    boardblack=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+	
+	#8 P White  , R to R white,8P Black ,R to R Black
+    mylist = ["P","P","P","P","P","P","P","P","R","N","B","Q","K","B","N","R","p","p","p","p","p","p","p","p","r","n","b","q","k","b","n","r"] 
     D = defaultdict(list)
     for i,item in enumerate(mylist):D[item].append(i)   
     Arr = {k:v for k,v in D.items()}
-    ranki = 0
-    index = 0
-    index2 = 0
-    count1 = 0
-    count2 = 0
+    ranki,index,index2,count1,count2=0,0,0,0,0
+	# Array board 
     for rank in ranks:
         for r in rank:
             if (re.compile("([kqbnrpKQBNRP])").match(r)):
-                index = index + 1
-                if(board[(Arr[r][0])] != -1):
-                    if(r == 'p'): 
+                index=index+1
+                if(board[(Arr[r][0])]!=-1):
+                    if(r=='p'): 
                         count1 += 1
-                        index2 = (Arr[r][count1])
-                    elif (r == 'P'):
+                        index2=(Arr[r][count1])
+                    elif (r=='P'):
                         count2 +=1
-                        index2 = (Arr[r][count2])
-                    else: index2 = (Arr[r][1])
-                else:index2 = (Arr[r][0])
-                board[index2] = (ranki * 8) + index
-            else: index = index + int(r)
-        ranki = ranki + 1
-        index = 0
-    ############ Whitebitboard & Blackbitboard
-    m = 0
-    n = 0
+                        index2=(Arr[r][count2])
+                    else: index2=(Arr[r][1])
+                else:index2=(Arr[r][0])
+                board[index2]=(ranki*8)+index
+            else: index=index+int(r)
+        ranki=ranki+1
+        index=0
+		
+    ############ Whitebitboard & Blackbitboard    
+    m,n,b,w=0,0,0,0
     for x in range(15):
-        if(board[x] != -1 and m == 0):
-            m = 1
-            w = (1 << 64 - board[x])
-        if(m == 1 and board[x + 1] != -1): 
-            w = w ^ (1 << 64 - board[x + 1])
-        if(board[x + 16] != -1 and n == 0):
-            n = 1
-            b = (1 << 64 - board[x + 16])
-        if(n == 1 and board[x + 17] != -1):
-            b = b ^ (1 << 64 - board[x + 17])
-    blackbitboard = ('{0:064b}'.format(b))
-    whitebitboard = ('{0:064b}'.format(w))
-    return(board,blackbitboard,whitebitboard,C_A_L,E_P_T_S,H_M_Clk,F_M_Counter) 
-
-#Utility Function Used in CheckMate
-#Gamal Mohammed 
+        if(board[x]!=-1 and m==0 ):      #first 16 elements in board Array for White pieces
+            m=1
+            w = (1<<64-board[x])
+        if(m==1 and board[x+1]!=-1 ): 
+            w = w ^ (1<<64-board[x+1])
+        if(board[x+16]!=-1 and n==0 ):   #last 16 elements in board Array for Black pieces
+            n=1
+            b = (1<<64-board[x+16])
+        if(n==1 and board[x+17]!=-1 ):
+            b = b ^ (1<<64-board[x+17])
+#    white=0;
+#    black=(1<<64-board[16]);
+#    for a in range(16):
+#        if(board[a]!=-1):
+#            white=white | (1<<64-board[a])
+#        if(board[a+16]!=-1):
+#            black=black | (1<<64-board[a+16])
+#    print("black=",black)
+#    print(white)
+    blackbitboard=b
+    whitebitboard=w
+    o=16
+    for x in board:
+        boardblack[o]=x
+        o=o+1
+        if o==32:
+            o=0
+    p=[]
+    return(board,boardblack,blackbitboard,whitebitboard, Side_To_M,C_A_L,E_P_T_S,H_M_Clk,F_M_Counter,p)
 def CheckAttackLine(BlackBitBoard,WhiteBitBoard,king_loc,step,board=[],potentialAttackers=[],board_limits=[]):
     i = king_loc + step
     esc = False
@@ -180,14 +177,18 @@ def CheckAttackLine(BlackBitBoard,WhiteBitBoard,king_loc,step,board=[],potential
 #   return true : if move will cause Check
 #   return false otherwise.
 # ( Gamal Mohammed )
-def CheckMate(BlackBitBoard,WhiteBitBoard, move,castling, board=[], *args):
+def CheckMate(BlackBitBoard,WhiteBitBoard, move,castling, board,boardbl, *args):
     # Emulate move
-    emulated_board = board[:]
+    emulated_board = board[:]    
+    emulated_boardbl = boardbl[:]
 	#Debug [Abdelrhman : 11 August ] 
     #print(move);
     displayPieces(emulated_board);
-    BlackBitBoard,WhiteBitBoard,emulated_board = doMove(BlackBitBoard,WhiteBitBoard,move,emulated_board)
-
+    BlackBitBoard,WhiteBitBoard,emulated_board,x,l = doMove(BlackBitBoard,WhiteBitBoard,move,emulated_board,emulated_boardbl)
+    #print (emulated_board)
+    #print (BlackBitBoard)
+    #print (WhiteBitBoard)
+    return True;
     if not castling:
         king_loc = emulated_board[12]
         count = 1
@@ -234,7 +235,7 @@ def CheckMate(BlackBitBoard,WhiteBitBoard, move,castling, board=[], *args):
     return True
 
 
-def generateMoves(BlackBitBoard,WhiteBitBoard,piece,left,right,order, board =[], *args ): # (Hager) and (Abdelrhman)
+def generateMoves(BlackBitBoard,WhiteBitBoard,piece,left,right,order, board,boardbl ): # (Hager) and (Abdelrhman)
     possible=[]
 	#Chess_Chari is a dictionary (in form {'piece':adi} describes :
 	#a-   the possible x coordinate move : [one of available -max- 8 options] from adi[i] where 0<=i<=7 
@@ -243,88 +244,143 @@ def generateMoves(BlackBitBoard,WhiteBitBoard,piece,left,right,order, board =[],
 	
 	#order specify the order of pawn [from 0 to 7] , Bishop,Rook and Knight [0 or 1] 
     
-    Chess_Chari={"K": [-1, -1, -1, 0,  0,  1, 1, 1,  3,12], \
-	"Q": [-1,-1,-1,0 ,0, 1,1,1,1, 11] ,"N": [-1,-2,-1,-2,1,2,1 ,2 ,2, 9,14],"P":[0,1,1,1,0,0,0,0,2, 0,1,2,3,4,5,6,7],\
-	"B": [-1,  0, -1, 0,  0,  1, 0, 1, 1, 10,13],"R": [ 0, -1, 0,  0,  0, 0, 1, 0, 1, 8,15]}
+    Chess_Chari={"K": [-1, -1, -1, 0,  0,  1, 1, 1,  3,12], 	"Q": [-1,-1,-1,0 ,0, 1,1,1,1, 11] ,"N": [-1,-2,-1,-2,1,2,1 ,2 ,2, 9,14],"P":[-1,-1,-1,-2,0,0,0,0,2, 0,1,2,3,4,5,6,7],	"B": [-1,  0, -1, 0,  0,  1, 0, 1, 1, 10,13],"R": [ 0, -1, 0,  0,  0, 0, 1, 0, 1, 8,15]}
 	
-    Chess_Charj={"K": [-1,  0,  1, -1, 1, -1, 0, 1,  3,12], \
-	"Q": [-1, 0,1 ,-1,1,-1,0,1,1, 11] ,"N": [-2,-1,2 , 1,2,1,-2,-1,2, 9,14],"P":[0,0,1,-1,0,0,0,0,2, 0,1,2,3,4,5,6,7],\
-	"B": [-1,  0,  1, 0,  0, -1, 0, 1, 1, 10,13],"R": [ 0,  0, 0, -1,  1, 0, 0, 0, 1, 8,15]}
-
+    Chess_Charj={"K": [-1,  0,  1, -1, 1, -1, 0, 1,  3,12], 	"Q": [-1, 0,1 ,-1,1,-1,0,1,1, 11] ,"N": [-2,-1,2 , 1,2,1,-2,-1,2, 9,14],"P":[-1,0,1,0,0,0,0,0,2, 0,1,2,3,4,5,6,7],	"B": [-1,  0,  1, 0,  0, -1, 0, 1, 1, 10,13],"R": [ 0,  0, 0, -1,  1, 0, 0, 0, 1, 8,15]}
     adi =Chess_Chari[piece]#get the vector adi corresponds to the piece 
-    adj =Chess_Charj[piece]#get the vector adj corresponds to the piece
-    
-    castling =[left,right]
+    adj =Chess_Charj[piece]#get the vector adj corresponds to the piece 
+    castling=[left,right]
     castlingx=[136,9]
-
-    #Iterate over the 2 	
-	#Bishop ,knight and Rook has 2 positions in board [two types of bishops , knights and rooks]        
-    j=order;
-    if board[adi[9+j]]==-1:#If piece is dead then return None
-          return ;
-    x=board[adi[9+j]]      #Get old poistion of the piece  
-    print('Old position : '+str(int(x/8))+' , '+str(x%8))
-    if (piece == "P" and 8<x<=16): #If piece is pawn and this is the first move 
-      adi[0]=2;	                  #Then pawn can move 2 squares forward 
-    for i in range(8) :   
-	
-            x=board[adi[9+j]]    #Get old poistion of the piece  
-            idxi=int(x/8)+adi[i] #Make a proposed horizontal move : starts from 0 to 7 
-            idxj=x%8     +adj[i] #Make a proposed vertical   move : starts from 1 to 8 
-            x= x + adi[i]*8 + adj[i]
-            print('Proposed New position : ('+str(idxi)+' , '+str(idxj)+ ") = "+str(x))
+    capture=[]
+    t=0;
+    pawn=0
+    for j in range(order):
+        if board[adi[9+j]]==-1:#If piece is dead then return None
+            print(adi)
+            continue;       
+        print(board[adi[9+j]])
+        for i in range(8):
+            x=board[adi[9+j]]#Get old poistion of the piece
+            xold=x
+            idxi=int(x/8)+adi[i]#Make a proposed vertical move : starts from 0 to 7 
+            idxj=x%8+adj[i]#Make a proposed horizontal move : starts from 0 to 7 
+            if x%8==0:
+                idxi=int(x/8)+adi[i]-1
+                idxj=8+adj[i]
+            x=idxi*8+idxj #new position 
             check=1
-			
             while 0 <= idxi <8 and 0 < idxj <=8 and check==1:
-                if x<64: #If x is valid then put proper value in l to check that no piece in proposed location
+                u=piece+str(j)+" "+str(xold)+" "
+                v=u
+                cast=0            
+                pawn=0
+                if x<=64:
                     l=1<<(64-x)
-                if l&WhiteBitBoard>0:#If piece exist then can't move forward 
+                if l&WhiteBitBoard>0:
                     break
-                if(piece=="P" and (i==2 or i==3)): #Pawn is in capturing move	
+                if(piece=="P" and (i==0 or i==2)): #Pawn is in capturing move
                     if l&BlackBitBoard==0:#If no capture then no capturing move can be done 
                         break
-                if(piece=="P" and (i==0 or i==1)): #Pawn is in not in capturing move	
-                    if l&BlackBitBoard>0:#If it try to capture prevent as Pawn can't capture in this way  
+#                if(piece=="P" and (i==4 or i==5) ): #Pawn can capture pawnbeside hime
+#                    if xold<33 or xold>40:                        
+#                        break
+#                    else:
+#                        lbf=1<<(65-(x))                   
+#                        laf=1<<(63-x)
+#                        print("lbf = ",lbf," laf = ",laf,lbf&BlackBitBoard)
+#                        if lbf&BlackBitBoard!=0 or laf&BlackBitBoard!=0:#If no capture then no capturing move can be done 
+#                            break
+                if(piece=="P" and i==3 ): #Pawn can make 2 move
+                    if xold<49 or xold>56:
+#                        lbf=1<<(65-x)                   
+#                        laf=1<<(63-x)
+#                        print("lbf = ",lbf," laf = ",laf,lbf&BlackBitBoard)
+#                        if lbf&BlackBitBoard!=0 or laf&BlackBitBoard!=0:#If no capture then no capturing move can be done 
+#                            break
+#                    else:
                         break
-						
-                u=piece+str(j)+" "+str(board[adi[8+j]])+" "+ str(x)
-				
-                check=adi[8] #repeat the move if adi[8]==1 (Queen , Bishop and Rook only) 
-                if CheckMate(BlackBitBoard,WhiteBitBoard,u,False, board)==True: 
-                    print('New position : ('+str(idxi)+' , '+str(idxj)+ ") = "+str(x),end=" ")
-                    possible.append(x)
-                if l&BlackBitBoard>0:#If piece exist then capture and make move [Need to be completed ] 
-                    print(' Capture Happens Here');
-                    break
-                print(" ")
+                u=u + str(x)
+                check=adi[8]
+                #print (u)
+                if CheckMate(BlackBitBoard,WhiteBitBoard,u,False, board,boardbl)==True:
+                    t=t+1
+                    possible.append(u)
+                    if l&BlackBitBoard>0:
+                        if board[24]==x or board[31]==x: #check if it capture rook
+                            capture.append("R")
+                        elif board[25]==x or board[30]==x: #check if it capture Knight
+                            capture.append("N")
+                        elif board[26]==x or board[29]==x: #check if it capture B
+                            capture.append("B")
+                        elif board[27]==x:					#check if it capture queen
+                            capture.append("Q")
+                        elif board[28]==x:					#check if it capture King
+                            capture.append("K")
+                        else:
+                            pawn=1
+                            capture.append("P")				#check if it capture pawn
+                        break
+                if l&BlackBitBoard>0:
+                     break
+                capture.append("-")
                 idxi=idxi+adi[i]
                 idxj=idxj+adj[i]
                 #print(str(idxi) +"  "+ str(idxj))
                 x=x+adi[i]*8+adj[i]
-    
-			
+        if piece=="K":
+            break
+    j=0
     for j in range(2):
-        if adi[8]==3 and castling[j]==1: #Happens with the King Only and if castling
-            if WhiteBitBoard^castlingx[j]==0:
-                if testCheck(BlackBitBoard,WhiteBitBoard,u,"true", board)=="true": #check 2 squares beside king and King
-                    possible.append((j+1)*1000)
-    
-    return possible
+        if adi[8]==3 and castling[j]==1:
+            if (WhiteBitBoard & castlingx[j])^castlingx[j]==0:
+                if CheckMate(BlackBitBoard,WhiteBitBoard,v+str((j+1)*1000),True, board,boardbl)==True: #check 2 squares beside king and King
+                    possible.append(v+str((j+1)*1000))
+                    capture.append("-")
+    cast=0
+    if piece=='R' or piece=='K' :
+         cast=xold
+    return possible,capture,pawn,cast
 
 # _____________________________________________________________________________#
 # This will do a sepcific move.[piece name and move included as generated from
 # FEM file)
 # return the updated board , BlackBitBoard , WhiteBitBoard
-def doMove(BlackBitBoard, WhiteBitBoard, move, board=[], *args):  # Hesham Magdy
-
+def doMove(BlackBitBoard, WhiteBitBoard, move, Board, BoardBlack):  # Hesham Magdy
     srcPos = int(move.split(" ")[1])# Move p0 13 45   [32 
     dstPos = int(move.split(" ")[2])
+    if int(dstPos) == 1000:        
+        Board[12] = 59
+        BoardBlack[28] = 59
+        if Board[8] == 57:
+            Board[8]=60
+            BoardBlack[24] = 60
+        else:
+           Board[15]=60
+           BoardBlack[31] = 60 
+        WhiteBitBoard = WhiteBitBoard ^ 184;
+        return BlackBitBoard, WhiteBitBoard, Board, BoardBlack, 1
+    if int(dstPos) == 2000:
+        Board[12] = 63
+        BoardBlack[28] = 63
+        if Board[8] == 64:
+            Board[8]=62
+            BoardBlack[24] = 62
+        else:
+           Board[15]=62
+           BoardBlack[31] = 62 
+        WhiteBitBoard = WhiteBitBoard ^ 15;
+        return BlackBitBoard, WhiteBitBoard, Board, BoardBlack, 2
     if srcPos <65 and srcPos > 0 and dstPos < 65 and dstPos > 0:       
-        index1 = board.index(srcPos)  if srcPos in board else -1   # My piece 
-        index2 = board.index(dstPos)  if dstPos in board else -1  # My piece 
-        if index2!=-1:          # If dstPos exists in the board ; Then capture will be done 
-            index2 = board.index(dstPos) # Get index (Piece) of the captured piece of opponent
-            board[index2] = -1           # opponent piece died 
+        index1 = Board.index(srcPos)  if srcPos in Board else -1   # My piece 
+        index2 = Board.index(dstPos)  if dstPos in Board else -1  # My piece 
+       # print(index2,move)
+        if index2 != -1:          # If dstPos exists in the Board ; Then capture will be done
+            index2 = Board.index(dstPos) # Get index (Piece) of the captured piece of opponent
+            Board[index2] = -1           # opponent piece died
+            if int(index2/16) >= 1:
+                BoardBlack[index2 - 16]=-1
+            else:
+                BoardBlack[index2 + 16]=-1
             if int(index2/16) < 1 and int(index1/16) >= 1: # destination white - Source black 
 			    # Put zero in BlackBitBoard srcPos and one in BlackBitBoard dstPos
 				# Put zero in WhiteBitBoard dstPos
@@ -346,31 +402,250 @@ def doMove(BlackBitBoard, WhiteBitBoard, move, board=[], *args):  # Hesham Magdy
                 BlackBitBoard = BlackBitBoard |  (1<<(64-dstPos)) ; 
                 BlackBitBoard = BlackBitBoard ^  (1<<(64-srcPos)) ;
 				
-        board[index1] = dstPos
+        Board[index1] = dstPos
+        if int(index1 / 16) >= 1:
+            BoardBlack[index1 - 16]=dstPos
+        else:
+            BoardBlack[index1 + 16]=dstPos
     else:
         print('Invalid Coordinates for doMove')
-        return BlackBitBoard, WhiteBitBoard, board
- 	
-    return BlackBitBoard, WhiteBitBoard, board
+        return BlackBitBoard, WhiteBitBoard, Board, BoardBlack, 0
+    return BlackBitBoard, WhiteBitBoard, Board, BoardBlack, 0
+def generateallmoves(move,depth): #Hager Samir
+    node = namedtuple('node', ['mymove','board','boardblack','blackbitboard','whitebitboard','C_A_L','array','capture','pawn'])
+    array=[]
+    nodes=[]
+    pieces=['R','N','B','Q','K','P']
+    order=2			#number of piecies
+    dicpos={'R':[],'N':[],'B':[],'Q':[],'K':[],'P':[]}#possibole moves for all pieces
+    diccap={'R':[],'N':[],'B':[],'Q':[],'K':[],'P':[]}#for all possible move what it capture if not capture='-'
+    if depth%2==0: #if I will play
+        for piece in pieces:
+            ca=move.C_A_L[:]
+            boardo=move.board[:]
+            boardbl=move.boardblack[:]
+            if piece=='P':
+                order=8
+            elif piece=='Q':
+                order=1
+            possible,capture,pawn,cast=generateMoves(move.blackbitboard,move.whitebitboard,piece,move.C_A_L[0],move.C_A_L[1],order, boardo,boardbl)#generate move for piece
+            dicpos[piece]=possible #i put possibole moves to this piece
+            diccap[piece]=capture #i put if it capture any thing in this possibole move to this piece
+            i=0
+            if(cast==57):
+                ca[1]=0
+            elif cast==64:
+                ca[0]=0
+            elif cast==61:
+                ca[1]=0
+                ca[0]=0
+            for move2 in possible:
+                boardo=move.board[:]
+                boardbl=move.boardblack[:]
+                nboard=[]
+                nblackbitboard,nwhitebitboard,nboard,nboardbl,cas=doMove(move.blackbitboard, move.whitebitboard, move2, boardo,boardbl)#get the new move
+                print(move2)
+                print(move.board)
+                print(nboard)
+                print(move.whitebitboard)                   
+                print(nwhitebitboard)
+                print(move.C_A_L)
+                print(ca)
+                newmove=node(move2,nboard,nboardbl,nblackbitboard,nwhitebitboard,move.C_A_L,array,capture[i],pawn)#create new node for anext move
+                i=i+1
+                nodes.append(newmove)
+    else: #if other team play
+        for piece in pieces:
+            ca=move.C_A_L[:]
+            boardo=move.board[:]
+            boardbl=move.boardblack[:]
+            if piece=='P':
+                order=8
+            elif piece=='Q':
+                order=1
+            possible,capture,pawn,cast=generateMoves(move.whitebitboard,move.blackbitboard,piece,move.C_A_L[2],move.C_A_L[3],order,boardbl, boardo)#generate move for piece
+            dicpos[piece]=possible #i put possibole moves to this piece
+            diccap[piece]=capture #i put if it capture any thing in this possibole move to this piece
+            i=0
+            if(cast==57):
+                ca[1]=0
+            elif cast==64:
+                ca[0]=0
+            elif cast==61:
+                ca[1]=0
+                ca[0]=0
+            for move2 in possible:
+                boardo=move.board[:]
+                boardbl=move.boardblack[:]
+                nboard=[]
+                nwhitebitboard,nblackbitboard,nboardbl,nboard,cas=doMove( move.whitebitboard,move.blackbitboard, move2,boardbl, boardo)#get the new move                
+                newmove=node(move2,nboard,nboardbl,nblackbitboard,nwhitebitboard,move.C_A_L,array,capture[i],pawn)#create new node for anext move
+                i=i+1
+                nodes.append(newmove)
+    move=move._replace(array=nodes)#update father node to know its childreen
 
-#_____________________________________________________________________________#
-#This will do a sepcific move.[piece name and move included as generated from
-#FEM file)
-#return the updated board , BlackBitBoard , WhiteBitBoard
-def evaluateBoard(BlackBitBoard,WhiteBitBoard, move, board=[], *args): #Hesham Magdy
-     return BlackBitBoard,WhiteBitBoard,board
-
-	 
-	 
-	 
-#_____________________________________________________________________________#
-#Update the pastMoves list by adding the current move to be done [to account
-#for Fifty-Move Rule]
-#Update board , BlackBitBoard , WhiteBitBoard [to account for Threefold
-#repetition draw rule]
-def updatePastMoves(move): #(Sara) and (Safa)
+#    print (move.array)
+#    print (move.boardblack)
+#    print (move.blackbitboard)
+#    print (move.whitebitboard)
+#    print (nodes)    
     return move
+def getcapture(allcap):
+    capuredmove=[]
+    for node in allcap:
+        if node.capture!='-':
+            capuredmove.append(node)
+    return capuredmove
+node = namedtuple('node', ['mymove','board','boardblack','blackbitboard','whitebitboard','C_A_L','array','capture','pawn'])
+board,boardblack,blackbitboard,whitebitboard,Side_To_M,C_A_L,E_P_T_S,H_M_Clk,F_M_Counter,p=readFEN2Board("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/4K2R b KQkq e3 0 1")
+#"k7/8/8/8/4Q3/8/8/4K3 w ---- - 0 1"
+capture='-'
+pawn=0
+lastmove=node("",board,boardblack,blackbitboard,whitebitboard,C_A_L,p,capture,pawn)
+#print(board)
+#print(lastmove)
+lastmove2=generateallmoves(lastmove,0)
+#print(getcapture(lastmove2.array))
+#print(E_P_T_S)
+#print (board)
+#print (lastmove.boardblack)
+#print (lastmove.blackbitboard)
+#print (lastmove.whitebitboard)
+#print (lastmove2.board)
+#print (lastmove2.boardblack)
+#print (lastmove2.blackbitboard)
+#print (lastmove2.whitebitboard)
+#print (lastmove2.C_A_L)
+#print (lastmove2.array)
 
-	
-	
+############################# update_half move clock & full move counter
+halfmove_clock=0
+fullmove_counter=1
+def update_half_full(piece_type,capture,Side_To_M):
+    if piece_type == 1 or capture != "-":    
+        halfmove_clock = 0         #  reset clock if piece is pawm or captured piece
+    else:
+        halfmove_clock += 1
+    if Side_To_M=="b":
+        fullmove_counter += 1        #  increment full move counter only after the black moves.
+    return fullmove_counter,halfmove_clock 
+##############################################################################################
+zArray= np.zeros((2,6,64)) 
+zCastle= np.zeros((4)) 
+zEnPassant= np.zeros((8)) 
+FileMasks8 =[]
+FileMasks8.append(0x101010101010101)
+FileMasks8.append(0x202020202020202)
+FileMasks8.append(0x404040404040404)
+FileMasks8.append(0x808080808080808)
+FileMasks8.append(0x1010101010101010)
+FileMasks8.append(0x2020202020202020)
+FileMasks8.append(0x4040404040404040)
+FileMasks8.append(0x8080808080808080)
+def random64() :
+    # Random bytes
+    csprng = random.SystemRandom()
+    # Random (probably large) integer
+    random_int = csprng.getrandbits(64)
+    return random_int
+def getZobristHash( WP,WN, WB, WR, WQ, WK, BP,BN, BB, BR, BQ ,BK, EP, CWK, CWQ,CBK, CBQ, WhiteToMove):
+        returnZKey = 0
+        for square in range(64):
+            if (((WP >> square) & 1) == 1):
+                returnZKey |= int(zArray[0][0][square])
+            elif (((BP >> square) & 1) == 1):
+            
+                returnZKey ^= int(zArray[1][0][square])
+            
+            elif (((WN >> square) & 1) == 1):
+            
+                returnZKey ^= int(zArray[0][1][square])
+            
+            elif (((BN >> square) & 1) == 1):
+            
+                returnZKey ^= int(zArray[1][1][square])
+            
+            elif  (((WB >> square) & 1) == 1):
+            
+                returnZKey ^= int(zArray[0][2][square])
+            
+            
+            elif  (((BB >> square) & 1) == 1):
+            
+                returnZKey ^= int(zArray[1][2][square])
+            
+            elif  (((WR >> square) & 1) == 1):
+            
+                returnZKey ^= int(zArray[0][3][square])
+            
+            elif  (((BR >> square) & 1) == 1):
+            
+                returnZKey ^= int(zArray[1][3][square])
+            
+            elif  (((WQ >> square) & 1) == 1):
+            
+                returnZKey ^= int(zArray[0][4][square])
+            
+            elif  (((BQ >> square) & 1) == 1):
+            
+                returnZKey ^= int(zArray[1][4][square])
+            
+            elif  (((WK >> square) & 1) == 1):
+            
+                returnZKey ^= int(zArray[0][5][square])
+            
+            elif (((BK >> square) & 1) == 1):
+            
+                returnZKey ^= int(zArray[1][5][square])
+            
+        for column in range(8):
+        
+            if (EP ==FileMasks8[column]):
+                
+                returnZKey ^= int(zEnPassant[column])
+            
+        
+        if (CWK):
+            returnZKey ^= int(zCastle[0])
+        if (CWQ):
+            returnZKey ^= int(zCastle[1])
+        if (CBK):
+            returnZKey ^= int(zCastle[2])
+        if (CBQ):
+            returnZKey ^= int(zCastle[3])
+        if (not WhiteToMove):
+            returnZKey ^= zBlackMove
+        return returnZKey
+def zobristFillArray() :
+    for colour in range(2):
+        for pieceType in range(6):
+                for square in range (64):
+                    zArray[colour,pieceType,square] =random64()
+    for column in range(8):
+          zEnPassant[column]=random64()
+    for index in range(4):
+          zCastle[index]=random64()
+    zBlackMove=random64() 
+
+def testDistribution():   
+    sampleSize = 2000;
+    sampleSeconds = 10;
+    startTime = int(round(time.time() * 1000))
+    endTime = startTime + (sampleSeconds * 1000);
+    distArray= np.zeros((sampleSize)) 
+    while (int(round(time.time() * 1000))<endTime):
+        for i in range(1000):
+            ind=(int)((random64()% (sampleSize / 2)) + (sampleSize / 2))
+            distArray[ind]=distArray[ind]+1;
+            
+        for k in range(sampleSize):
+            print(distArray[k]) 
+#zobristFillArray() 
+#testDistribution()
+#getZobristHash( 0,0, 0, 0, 0,0, 0,0,0, 0,0 ,0,0, 0,0,0,0, 1)
+
+
+# In[ ]:
+
+
 
