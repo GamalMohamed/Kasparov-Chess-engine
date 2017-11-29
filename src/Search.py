@@ -1,66 +1,42 @@
 from defs import * 
 from MoveGeneration import *
 
-visited_nodes = 0
-
-def ProbePvTable():
+def Evaluation():
+    # Need to be added!!
     return 0
 
-def StorePvMove(move):
-    return 0
+def alphaBeta(board, alpha, beta, depth, player):
+        if depth <= 0:
+            return Evaluation()
 
+        move_list = generateMoves(board)  # Need to be updated in accordance to the actual move function!!
+        for move in move_list:
+            # doMove()
+            current_eval = -alphaBeta(board,-beta, -alpha, depth - 1, -player)
+            # UndoMove() ??
 
-def Quiescence(alpha, beta):
-    return 0
-
-def AplhaBeta(alpha, beta, depth):
-    if depth <= 0:
-        return Quiescence(alpha,beta)
-    
-    visited_nodes+=1
-
-    # Check for repitition & 50 move (need to add history table!)
-    # Check if reached max depth
-    # ?
-
-    moveslist = generateMoves()
-    bestMove = NOMOVE
-    score = -INFINITE
-    OldAlpha = alpha
-
-    PvMove = ProbePvTable()
-	#if PvMove != NOMOVE:
-		# Check if move in PV table
-	
-    for move in moveslist:
-        # PickNextMove()
-        score = -AlphaBeta(-beta, -alpha, depth - 1) 
-        if score > alpha:
-            if score >= beta:
+            if current_eval >= beta:
                 return beta
-            # fetch history table
-            alpha = score
-            bestMove = move 
-       
-        if alpha != OldAlpha:
-            StorePvMove(BestMove)
-    return alpha
+
+            if current_eval > alpha:
+                alpha = current_eval
+
+        return alpha
 
 
-def SearchPosition():
-    bestMove = NOMOVE
-    bestScore = -INFINITE
-    score = -INFINITE
+def Search(board, depth, player):
+    best_move = None
+    max_eval = float('-infinity')
 
-    # Clear_for_search()
+    move_list = generateMoves(board)  # Need to be updated in accordance to the actual move function!!
+    alpha = float('infinity')
+    for move in move_list:
+        # doMove()
+        alpha = -alphaBeta(board, float('-infinity'), alpha, depth - 1, -player)
+        # UndoMove ??
 
-    # Iterative Deepening
-    for currentDepth in range(FIXEDDEPTH):
-        score = AplhaBeta(-INFINITE, INFINITE, currentDepth)
-        
-        bestScore = score
+        if alpha > max_eval:
+            max_eval = alpha
+            best_move = move
 
-        bestMove = ProbePvTable()
-
-    return bestMove
-
+    return best_move
